@@ -39,6 +39,7 @@ def get_dataloader(dataset_name, base_dir, split, factor=4, batch_size=None, shu
     loader.near = d.near
     loader.far = d.far
     loader.n_image = d.n_poses - (d.n_poses-1)//8 - 1
+    loader.train_n = d.train_n - (d.train_n-1)//8 - 1
     return loader
 
 
@@ -314,8 +315,9 @@ class NeRFDataset(Dataset):
 
     def __len__(self):
         if self.split == "test_images":
-            print("npose: ",self.n_poses)
-            return self.n_poses
+            #print("npose: ",self.n_poses)
+            #return self.n_poses
+            return self.rays[0].shape[0]
         elif self.split == "render": #self.rays[0].shape[0]?????
             return self.rays[0].shape[0]
         else:
@@ -451,7 +453,7 @@ class LLFF(NeRFDataset):
         img_dir = path.join(self.base_dir, img_dir)
         
         mask_files = sorted(list(glob.glob(os.path.join(img_dir, '**', '*mask*.png'), recursive=True)))
-        img_files = [fname.rsplit('_mask', 1)[0] + ".png" for fname in mask_files]
+        img_files = [fname.rsplit('_mask', 1)[0] + ".JPG" for fname in mask_files] #suffix
         
         images = []
         images_mask = []
@@ -494,6 +496,7 @@ class LLFF(NeRFDataset):
         self.poses = poses
         self.images = images
         self.n_poses = images.shape[0]
+        self.train_n = images.shape[0]
         self.images_mask = images_mask
         self.h, self.w = images.shape[1:3]
 
@@ -519,6 +522,7 @@ class LLFF(NeRFDataset):
         self.poses = np.array(self.poses[indices]).astype(np.float32)
         #self.n_poses = indices.shape[0] # get overwritten in generate_training_poses, change back to original
         self.cam_to_world = self.poses[:, :3, :4]
+        print("camtoworld: ", self.cam_to_world.shape)
         self.focal = self.poses[0, -1, -1]
 
     def generate_training_rays(self):

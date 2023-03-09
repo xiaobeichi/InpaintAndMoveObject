@@ -61,7 +61,10 @@ def train_model(config):
 
     for step in tqdm(range(0, config.max_steps)):
         rays, pixels = next(data)
-        comp_rgb, _, _ = model(rays)
+        comp_rgb, dist, acc = model(rays)
+        if step % 1000 == 0: # show dist and acc
+            print("dist: ",dist.shape, dist)
+            print("acc: ",acc.shape, acc)
         pixels = pixels.to(config.device)
 
         # Compute loss and update model weights.
@@ -100,15 +103,15 @@ def train_model(config):
             model.eval()
             #rgb_frames = []
             i = 0
-            
+            print("test ", len(test_data), " images")
             for ray in tqdm(test_data):
                 img, dist, acc = model.render_image(ray, test_data.h, test_data.w, chunks=config.chunks)
-                print("img:",img.shape)
-                print("imgmaz:", img.max())
+                # print("img:",img.shape)
+                # print("imgmaz:", img.max())
                 #rgb_frames.append(img)
                 #Image.
                 #cv2.imwrite(path.join(config.save_dir,str(step)+"_"+str(i)+".png"), img)
-                logger.add_image("color", img, step, dataformats="HWC")
+                logger.add_image("color"+str(i), img, step, dataformats="HWC")
                 i += 1
                 if i == 2:
                     break

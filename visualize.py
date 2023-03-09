@@ -12,7 +12,7 @@ def visualize(config):
     data = get_dataloader(config.dataset_name, config.data_dir, split="render", factor=config.factor, shuffle=False)
 
     model = MipNeRF(
-        35,
+        data.train_n,
         use_viewdirs=config.use_viewdirs,
         randomized=config.randomized,
         ray_shape=config.ray_shape,

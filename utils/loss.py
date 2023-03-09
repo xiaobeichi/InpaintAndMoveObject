@@ -14,7 +14,8 @@ class NeRFLoss(torch.nn.modules.loss._Loss):
     def forward(self, input, target, mask, indice, isMask, step):
         #print("indiceshape : ",indice.shape," ",indice[0][0])
         rgb_losses = []
-        u2 = torch.nn.ReLU()(self.u)
+        #u2 = torch.nn.ReLU()(self.u)
+        u2 = torch.clamp(self.u, 0, 5)
         reg_loss = torch.sum(u2)/len(self.u)
         psnrs = []
         for rgb in input:

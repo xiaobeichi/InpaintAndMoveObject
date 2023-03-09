@@ -305,12 +305,12 @@ def volumetric_rendering(rgb, density, t_vals, dirs, white_bkgd):
         torch.zeros_like(density_delta[..., :1]),
         torch.cumsum(density_delta[..., :-1], dim=-1)
     ], dim=-1))
-    weights = alpha * trans
+    weights = alpha * trans # every points weith
 
     comp_rgb = (weights[..., None] * rgb).sum(dim=-2)
-    acc = weights.sum(dim=-1)
+    acc = weights.sum(dim=-1) # accumulate
     distance = (weights * t_mids).sum(dim=-1) / acc
     distance = torch.clamp(torch.nan_to_num(distance), t_vals[:, 0], t_vals[:, -1])
-    if white_bkgd:
+    if white_bkgd: # false for llff
         comp_rgb = comp_rgb + (1. - acc[..., None])
     return comp_rgb, distance, acc, weights, alpha
